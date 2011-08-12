@@ -1,0 +1,379 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+	
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+
+<style>
+
+body {
+	background: #999;
+}
+
+.modal {
+	position: absolute;
+	width: 410px;
+	font-size: 18px;
+	top: 50%;
+	left: 50%;
+	padding: 25px;
+	margin-top: -155px;
+	margin-left: -230px;
+	border-radius: 24px;
+	-moz-border-radius: 24px;
+	background: #dadada;
+	-webkit-box-shadow: 0px 0px 8px #333;
+	-moz-box-shadow: 0px 0px 8px #333;
+	
+}
+
+#instructions {
+	font-size: 19px;
+}
+
+#instructions .task {
+	font-weight: bold;
+}
+
+#instructions .button {
+	margin-top: 6px;
+}
+ 
+
+#postMessage {
+	width: 420px;
+	margin-left: -235px;
+	display: none;
+	text-align: center;
+	font-size: 28px;
+	margin-top: -80px;
+	padding: 25px;
+}
+
+#postMessage .button {
+	margin: 10px;
+	font-size: 17px;
+}
+
+.actions {
+	margin-top: 20px;
+	
+}
+
+#practiceBox {
+	width: 130px;
+	float: left;
+	margin: 0px 30px 0px 10px;
+	font-size: 22px;
+	text-align: center;
+}
+
+#practice {
+	-webkit-box-shadow: 0px 0px 12px #333;
+	-moz-box-shadow: 0px 0px 12px #333;
+	
+	width: 100px;
+	margin: 2px auto 10px auto;
+}
+
+.button {
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+	padding: 3px 8px;
+	color: white;
+	background: #333;
+	font-size: 24px;
+	margin: 12px auto 4px auto;
+	text-transform: uppercase;
+	cursor: pointer;
+	letter-spacing: 2px;
+}
+
+.button:hover {
+	background: #555;
+}
+
+#timer, #task {
+	margin-top: 10px;
+	text-align: center;
+	font-size: 26px;
+	color: white;
+}
+
+#task {
+	font-size: 34px;
+}
+
+
+#time {
+}
+
+#canvas {
+	margin: 10px auto;
+	width: 500px;
+	-webkit-box-shadow: 0px 0px 12px #333;
+	-moz-box-shadow: 0px 0px 12px #333;
+	
+}
+
+.row {
+	height: 10px;
+	clear: both;
+}
+
+.pixel {
+	width: 10px;
+	height: 10px;
+	float: left;
+}
+
+.pixel.off {
+	background: white;
+}
+
+.pixel.off:hover {
+	background: black;
+}
+
+.pixel.off.justClicked:hover {
+	background: white;
+}
+
+.pixel.on {
+	background: black;
+}
+
+.pixel.on:hover {
+	background: #aaa;
+}
+
+.pixel.on.justClicked:hover {
+	background: black;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.clear {
+	clear: both;
+}
+
+</style>
+	
+<script type="text/javascript">
+$(function() {
+
+
+parent = "none"
+task = ""
+initialPixels = []	
+
+size = 50;
+drag = 0;
+
+urlParams = {}
+
+var e,
+    a = /\+/g,  // Regex for replacing addition symbol with a space
+    r = /([^&=]+)=?([^&]*)/g,
+    d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
+    q = window.location.search.substring(1);
+
+while (e = r.exec(q))
+   urlParams[d(e[1])] = d(e[2]);
+
+for (i = 0; i < size; i++){
+	$("#canvas").append("<div class='row'></div>")
+	for (k = 0; k < size; k++){
+		$(".row").last().append("<div class='pixel off'></div")
+	}
+}
+
+for (i = 0; i < 10; i++){
+	$("#practice").append("<div class='row'></div>")
+	for (k = 0; k < 10; k++){
+		$(".row").last().append("<div class='pixel off'></div")
+	}
+}
+
+$(document).bind("dragstart", function() {
+     return false;
+});
+
+$(document).mousedown(function() {
+	drag = 1
+})
+
+$(document).mouseup(function() {
+	drag = 0
+})
+
+$(".pixel").live("click", function() {
+	if ($(this).hasClass("on")) {
+		$(this).removeClass("on").addClass("off")
+	} else {
+		$(this).removeClass("off").addClass("on")
+	}
+	$(this).addClass("justClicked")
+})
+
+$(".pixel").mouseenter(function() {
+	if (drag == 1) {
+		if ($(this).hasClass("on")) {
+			$(this).removeClass("on").addClass("off")
+		} else {
+			$(this).removeClass("off").addClass("on")
+		}
+	}
+})
+
+$(".pixel").live("mouseleave", function() {
+	$(this).removeClass("justClicked")
+})
+
+if ("task" in urlParams) {
+	getStr = "next.py?task=" + urlParams["task"]
+} else {
+	getStr = "next.py"
+}
+
+$.get(getStr, function(d) {
+	if ("error" in d) {
+		alert("Problem! " + d["error"])
+		return;
+	}
+
+	drawPixels(d["pixels"])
+	initialPixels = d["pixels"]
+	parent = d["id"]
+	task = d["task"]
+	
+	$(".task").html(toTitleCase(task))
+	
+	$("#instructions .button").html("Start")
+	$("#instructions .button").click(function(){
+
+		$("#instructions").hide()
+		$("#practice").remove()
+		setTimeout("updateTimer()", 1000)
+	})
+})
+
+
+
+
+	
+});
+
+function updateTimer() {
+	t = parseInt($("#time").html());
+	if (t == 0) {
+		$(".pixel").unbind("click")
+		$("#timer").html("")
+		$("#postMessage").show()
+		saveCanvas()
+	} else {
+		$("#time").html(t-1);
+		setTimeout("updateTimer()", 1000)
+	}
+	
+	if (t == 5) $("#timer").css("color", "red")
+}
+
+function saveCanvas() {
+	var i, k;
+	var $row;
+	var pixels = {};
+	var post = {}
+	var postJSON = {}
+	
+	
+	for (i = 0; i < size; i++){
+		pixels[i] = []
+		$row = $(".row").eq(i)
+		for (k = 0; k < size; k++){
+			pixels[i][k] =	$(".pixel", $row).eq(k).hasClass("on") ? 1 : 0;
+		}
+	}
+	
+	post["pixels"] = pixels;
+	post["parent"] = parent;
+	post["task"] = task;
+	
+ 	postJSON= JSON.stringify(post);
+ 
+	$.post("save.py", {"json": postJSON}, function(data) {
+		if (data["result"]) {
+
+		}
+	})
+ 
+}
+
+function drawPixels(pixels) {
+	var i, k
+	
+	if (pixels.length == 0) return;
+	
+	for (i = 0; i < size; i++){
+		$row = $(".row").eq(i)
+		for (k = 0; k < size; k++){
+			if (pixels[i][k]) {
+				$(".pixel", $row).eq(k).addClass("on").removeClass("off")
+			} else {
+				$(".pixel", $row).eq(k).addClass("off").removeClass("on")
+				
+			}
+		}
+	}
+
+}
+
+function toTitleCase(str)
+{
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
+
+</script>	
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-22064793-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</head>
+
+<body>
+	<div id="task">Draw a <span class="task">...</span></div>
+	<div id="canvas"></div>
+	<div id="timer">You have <span id="time">15</span> seconds to draw.</div>
+	
+	<div id="instructions" class="modal">
+		<div id="practiceBox">
+			<div id="practice"></div>Practice drawing here
+		</div>
+		This is a drawing in progress of a <span class="task">...</span><br><br>
+		You have <b>15 seconds</b> to make it a little better.<br><br><br>
+		
+		<center><span class="button">Loading...</span></center>
+	</div>	
+	
+	<div id="postMessage" class="modal">
+		Thanks for contributing!
+		<div class="actions"><span class="button"><a href="draw.html">Draw Again</a></span><span class="button"><a href="view.html">View All Drawings</a></span></div>
+		
+	</div>	
+	
+</body>
+</html>

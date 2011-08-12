@@ -1,0 +1,134 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	
+<title>Crowd Art</title>
+
+<style>
+
+body {
+	text-align: center;
+	padding-top: 5%;
+	font-family: "Times New Roman", Times, serif;
+
+}
+
+#box {
+	border: 2px solid black;
+	width: 280px;
+	height: 140px;
+	margin:0px auto 30px auto;
+	
+}
+
+#logo {
+	font-size: 170px;
+	margin-bottom: 36px;
+	margin-right: 19px;
+}
+
+#experiments {
+	width: 810px;
+	margin: 0px auto;	
+	background: #eee;
+	border-radius: 10px;
+	-webkit-box-shadow: 0px 0px 4px #333;
+	-moz-box-shadow: 0px 0px 4px #333;	
+	
+}
+
+.experimentTitle {
+	padding-top: 30px;
+}
+
+.experimentNum {
+	font-size: 44px;
+	margin-right: 20px;	
+}
+
+.experimentName {
+	font-size: 44px;
+
+}
+
+.experimentDescription {
+	padding: 10px 0px 0px 25px;
+	color: #333;
+	font-size: 18px;
+	text-align: left;
+}
+
+#experiments img {
+	float: right;
+	margin:  27px 36px;
+	height: 201px;
+	width: 241px;
+	-webkit-box-shadow: 0px 0px 5px #333;
+	-moz-box-shadow: 0px 0px 5px #333;	
+	border-radius: 15px;	
+	-moz-border-radius: 15px;
+}
+
+.buttons {
+	margin-top: 24px;
+}
+
+.button {
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+	padding: 7px 22px;
+	color: white;
+	background: #00aeef;
+	font-size: 30px;
+	margin: 8px 18px;
+	text-transform: uppercase;
+	cursor: pointer;
+	letter-spacing: 2px;
+	text-decoration: none;
+	-webkit-box-shadow: 0px 0px 6px #333;
+	-moz-box-shadow: 0px 0px 6px #333;	
+}
+
+.button:hover {
+	background: #333;
+	
+}
+
+.clear {
+	clear: both;
+}
+
+</style>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-22064793-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</head>
+<body>
+	<div id="logo">Crowd Art</div>
+	<div id="experiments">
+		<img src="/img/horse.gif">
+		<div class="experimentTitle">	
+			<span class="experimentNum">Experiment 1:</span>
+			<span class="experimentName">Grids</span> 
+		</div>
+		<div class="experimentDescription">
+		Each contributor is given 30 seconds to turn on or off pixels in a 50x50 grid. Drawings grow over time, but no one person can do too much.
+		</div>	
+		<div class="buttons">
+			<a href="/grids/draw" class="button">Contribute</a>	
+			<a href="/grids/view" class="button">View</a>	
+		</div>
+		<div class="clear"></div>
+	</div>
+</body>
+</html>

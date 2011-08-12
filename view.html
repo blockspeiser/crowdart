@@ -1,0 +1,579 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+	
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script type="text/javascript" src="/js/jquery.jscrollpane.min.js"></script>
+
+
+<style>
+
+body {
+	background: #999;
+	font-family: "Times New Roman", Times, serif;
+}
+
+#content {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 880px;
+	margin: -300px 0px 0px -440px;
+}
+
+#loading {
+	font-weight: bold;
+	color: #00aeef;
+	letter-spacing: 1px;
+	font-size: 34px;
+	text-align: center;
+	background: white;
+	border-radius: 15px;
+	-moz-border-radius: 15px;
+	position: absolute;
+	padding: 5px 0px;
+	width: 200px;
+	top: 50%;
+	left: 50%;
+	margin-left: -100px;
+	margin-top: -20px;
+}
+
+#controls {
+	color: black;
+	padding: 0px 0px 0px 0px;
+	margin: 0px 15px;
+	text-align: center;
+	width: 250px;
+}
+
+.message {
+	color: #555;
+	background: #ddd;
+	border-radius: 15px;
+	-moz-border-radius: 15px;
+	-webkit-box-shadow: 0px 0px 12px #333;
+	-moz-box-shadow: 0px 0px 12px #333;
+	padding: 15px 20px;	
+	
+}
+
+#frames {
+	padding: 7px 20px;
+}
+
+
+#currentTask {
+	color: #00aeef;
+	font-size: 30px;
+	font-weight: bold;
+	letter-spacing: 2px;
+}
+
+#currentFrame {
+	font-size: 22px;
+}
+
+#play {
+	margin: 10px;
+}
+
+#play.playing {
+	line-height: 60px;
+
+	font-size: 60px;
+}
+
+#buttons {
+	margin-top: -20px;
+	margin-bottom: 10px;
+}
+
+#buttons span {
+	line-height: 70px;
+	font-size: 76px;
+	cursor: pointer;
+}
+
+#buttons span:hover {
+	color: #00aeef;
+}
+
+#drawAgain {
+	display: none;
+	margin-top: 3px;
+	width: 160px;
+}
+
+#branchesBox {
+	margin: 15px 0px;
+	padding: 2px 14px;
+}
+
+#branches {
+	text-align: left;
+	list-style: none;
+	overflow: auto;
+	width: 100%;
+	height: 349px;
+	
+}
+
+
+#branches li.current {
+	color: #00aeef;
+}
+
+.task {
+	margin-right: 5px;
+	font-size: 20px;
+	cursor: pointer;
+}
+
+.task:hover {
+	text-decoration: underline;
+}
+
+.branch {
+	margin-left: -7px;
+	font-size: 15px;
+}
+
+.branchId {
+	display: none;
+}
+
+.button {
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+	padding: 6px 14px;
+	color: white;
+	background: #00aeef;
+	font-size: 17px;
+	margin: 8px auto;
+	text-transform: uppercase;
+	cursor: pointer;
+	letter-spacing: 2px;
+	-webkit-box-shadow: 0px 0px 7px #333;
+	-moz-box-shadow: 0px 0px 7px #333;	
+}
+
+.button:hover {
+	background: #333;
+	
+}
+
+
+#canvas {
+	float: right;
+	background: white;
+	position: relative;
+	-webkit-box-shadow: 0px 0px 12px #333;
+	-moz-box-shadow: 0px 0px 12px #333;	
+}
+
+.row {
+	height: 10px;
+	clear: both;
+}
+
+.pixel {
+	width: 14px;
+	height: 14px;
+	float: left;
+}
+
+.pixel.off {
+	background: white;
+}
+
+.pixel.on {
+	background: black;
+}
+
+#random{
+	margin: 10px 0px;
+	font-size: 17px;
+	text-align: center;
+	letter-spacing: 1px;
+	font-weight: 400;
+	color: #00aeef;
+
+}
+
+#random:hover {
+	text-decoration: underline;
+
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.clear {
+	clear: both;
+}
+
+
+/* jScrollPane CSS */
+
+.jspContainer
+{
+	overflow: hidden;
+	position: relative;	
+}
+
+.jspPane
+{
+	position: absolute;
+}
+
+.jspVerticalBar
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 16px;
+	height: 100%;
+	background: transparent;
+}
+
+.jspHorizontalBar
+{
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	height: 16px;
+	background: transparent;
+}
+
+.jspVerticalBar *,
+.jspHorizontalBar *
+{
+	margin: 0;
+	padding: 0;
+}
+
+.jspCap
+{
+	display: none;
+}
+
+.jspHorizontalBar .jspCap
+{
+	float: left;
+}
+
+.jspTrack
+{
+	background: #e9e9e9;
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	position: relative;
+}
+
+.jspDrag
+{
+	background: -webkit-gradient(linear, left center, right center, from(#bbb), to(#999));
+	background: -moz-linear-gradient(left, #bbb, #999);
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	position: relative;
+	top: 0;
+	left: 0;
+	cursor: pointer;
+}
+
+.jspHorizontalBar .jspTrack,
+.jspHorizontalBar .jspDrag
+{
+	float: left;
+	height: 100%;
+}
+
+.jspArrow
+{
+	background: #50506d;
+	text-indent: -20000px;
+	display: block;
+	cursor: pointer;
+}
+
+.jspArrow.jspDisabled
+{
+	cursor: default;
+	background: #80808d;
+}
+
+.jspVerticalBar .jspArrow
+{
+	height: 16px;
+}
+
+.jspHorizontalBar .jspArrow
+{
+	width: 16px;
+	float: left;
+	height: 100%;
+}
+
+.jspVerticalBar .jspArrow:focus
+{
+	outline: none;
+}
+
+.jspCorner
+{
+	background: #eeeef4;
+	float: left;
+	height: 100%;
+}
+
+/* Yuk! CSS Hack for IE6 3 pixel bug :( */
+* html .jspCorner
+{
+	margin: 0 -3px 0 0;
+}
+
+
+</style>
+	
+<script type="text/javascript">
+$(function() {
+
+branchesList = "BRANCHES"
+task = "";
+branches = []	
+currentBranch = 0;
+currentFrame = 0;
+drawTimeout = 0;
+size = 50;
+
+ctx = document.getElementById("cnv").getContext("2d")
+
+
+function makeBranchesList() {
+	var branchesStr = ""
+	for (var i=0; i < branches.length; i++) {
+		var task = branches[i]["task"]
+		var branch = branches[i]["branch"]
+		var depth = branches[i]["depth"]
+		
+		
+		branchesStr += "<li class='branch' data-id='" + i + "'><span class='task'>" + toTitleCase(task) + "</span><span class='branchId'>" + branch + ":</span><span class='depth'>- " + depth + " steps</span></li>"
+	}
+	$("#branches").append(branchesStr)
+	$("#branches").jScrollPane({verticalGutter: -16, hideFocus: true});
+
+
+	currentFrame = branchesList[0]["depth"] -1
+	$("#currentFrame").html(branchesList[0]["depth"] + " of " + branchesList[0]["depth"])
+	$("#currentTask").html(toTitleCase(branchesList[0]["task"]))
+}
+
+function loadBranches(d) {
+
+	branches = d.branches
+
+	currentBranch = 0
+	
+	makeBranchesList()
+
+	$("#branches li[data-id='0']").trigger("click")
+
+	$("#loading").hide()
+	$("#drawAgain").show()
+}
+
+$("#branches li").live("click", function(e) {
+	var id = parseInt($(this).attr("data-id"))
+	currentBranch = id
+	currentFrame = branches[currentBranch]["depth"] - 1
+	$("#branches li").removeClass("current")
+	$("#branches li").eq(id).addClass("current")
+	if ($("#play").hasClass("playing")) $("#play").trigger("click")
+	
+	$("a", "#drawAgain").attr("href", "/grids/draw/" + branches[currentBranch].id)
+	
+	updateCanvas()
+})
+
+loadBranches(branches)
+
+
+$("#play").click(function(e) {
+	if ($(this).hasClass("playing")) {
+		$(this).html("&#0155;")
+		$(this).removeClass("playing")
+		clearTimeout(drawTimeout)		
+	} else if (!("frames" in branches[currentBranch])) {
+		$("#loading").show()
+		var getStr = "/api/grids/bits/" + branches[currentBranch]["id"]
+		$.get(getStr, function(data) {
+			branches[currentBranch]["frames"] = data.frames
+			$("#loading").hide()
+			$("#play").trigger("click")
+		})
+	} else {
+		$(this).addClass("playing")
+		$(this).html("&#0215;")
+		drawNext()
+	}
+});
+
+$("#prev").click(function() {
+	if (!("frames" in branches[currentBranch])) {
+		$("#loading").show()
+		var getStr = "/api/grids/bits/" + branches[currentBranch]["id"]
+		$.get(getStr, function(data) {
+			branches[currentBranch]["frames"] = data.frames
+			$("#loading").hide()
+			$("#prev").trigger("click")
+		})
+	} else {
+		if ($("#play").hasClass("playing")) $("#play").trigger("click")
+		currentFrame = currentFrame == 0 ? branches[currentBranch]["depth"] - 1 : currentFrame - 1
+		updateCanvas()
+	}
+})
+	
+$("#next").click(function() {
+	if (!("frames" in branches[currentBranch])) {
+		$("#loading").show()
+		var getStr = "/api/grids/bits/" + branches[currentBranch]["id"]
+		$.get(getStr, function(data) {
+			branches[currentBranch]["frames"] = data.frames
+			$("#loading").hide()
+			$("#next").trigger("click")
+		})
+	} else {
+		if ($("#play").hasClass("playing")) $("#play").trigger("click")
+		currentFrame = (currentFrame + 1) % branches[currentBranch]["depth"]
+		updateCanvas()
+	}
+})
+
+	
+});
+
+$(".button").click(function(){
+	$("a", $(this)).trigger("click")
+})
+
+function updateCanvas() {
+	$("#currentFrame").html((currentFrame+1) + " of " + branches[currentBranch]["depth"])
+	$("#currentTask").html(toTitleCase(branches[currentBranch]["task"]))
+	if ("frames" in branches[currentBranch]) {
+		drawPixels(branches[currentBranch]["frames"][currentFrame])
+	} else {
+		drawPixels(branches[currentBranch]["pixels"])
+		
+	}
+}
+
+function drawNext() {
+	currentFrame = (currentFrame + 1) % branches[currentBranch]["depth"];
+	updateCanvas()
+	if (currentFrame == branches[currentBranch]["depth"] -1) {
+		$("#play").trigger("click")
+	} else {
+		drawTimeout = setTimeout("drawNext()", 300)
+	}
+}
+
+function drawPixels(pixels) {
+	var i, k
+	pixels = unpackPixels(pixels)
+	
+	if (pixels.length == 0) return;
+	
+	for (i = 0; i < size; i++){
+		for (k = 0; k < size; k++){
+			if (pixels[i][k]) {
+				ctx.fillStyle = "black"
+			} else {
+				ctx.fillStyle = "white"
+			}
+			ctx.fillRect(k*12, i*12, 12, 12)
+		}
+	}
+
+}
+
+function toTitleCase(str)
+{
+	if (!str) return false
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
+
+function unpackPixels(bitsArray) {
+	
+	
+	var pixelsArray = []
+	
+	for (var i =0; i < bitsArray.length; i++) {
+		var bitsString = bitsArray[i].toString(2).slice(1)
+		var pixels = []
+		while(bitsString) {
+			bit =  bitsString[0]			
+			pixels.push(bit == "1" ? 1 : 0)
+			bitsString = bitsString.slice(1)
+		}
+		
+		for (var k = pixels.length; k < 50; k++) {
+			pixels.push(0)
+		}
+		
+		pixelsArray.push(pixels.slice())
+	}
+
+
+	return pixelsArray
+}
+
+</script>	
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-22064793-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</head>
+
+<body>
+	<div id="content">
+		<div id="canvas">
+			<div id="loading">Loading...</div>
+			<canvas id="cnv" width="600px" height="600px"></canvas>
+		</div>
+		<div id="controls">
+			<div id="frames" class="message">
+				<div id="currentTask"></div>
+				<div id="currentFrame"></div>
+				<div id="buttons">
+					<span id="prev">&#0171;</span><span id="play">&#0155;</span><span id="next">&#0187;</span>
+				</div>
+				<div class="button" id="drawAgain"><a href="/grids/draw">Draw on This</a></div>
+			</div>
+			<div id="branchesBox" class="message">
+				<ul id="branches"></ul>
+				<div id="random">
+					<a href="/grids/draw">Draw Random</a>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	
+</body>
+</html>

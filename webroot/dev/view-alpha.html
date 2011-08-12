@@ -1,0 +1,372 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+	
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+
+<style>
+
+body {
+	background: #999;
+	width: 750px;
+	margin: 0px auto;
+	position: relative;
+}
+
+
+#loading {
+	font-weight: bold;
+	color: #00aeef;
+	letter-spacing: 1px;
+	font-size: 34px;
+	text-align: center;
+	background: white;
+	border-radius: 15px;
+	-moz-border-radius: 15px;
+	position: absolute;
+	padding: 5px 0px;
+	width: 200px;
+	top: 200px;
+	left: 50%;
+	margin-left: -100px;
+}
+
+#controls {
+	color: black;
+	padding: 40px 0px 0px 0px;
+	margin: 0px 15px;
+	text-align: center;
+	width: 220px;
+	display: none;
+}
+
+.message {
+	color: #555;
+	background: #ddd;
+	border-radius: 15px;
+	-moz-border-radius: 15px;
+	-webkit-box-shadow: 0px 0px 12px #333;
+	-moz-box-shadow: 0px 0px 12px #333;
+	padding: 15px 20px;	
+	
+}
+
+
+
+#currentTask {
+	color: #00aeef;
+	font-size: 30px;
+	font-weight: bold;
+	letter-spacing: 2px;
+}
+
+#currentFrame {
+	font-size: 22px;
+}
+
+#play {
+	margin: 10px;
+}
+
+#play.playing {
+	font-size: 48px;
+}
+
+#buttons {
+	margin-top: -20px;
+	margin-bottom: -10px;
+}
+
+#buttons span {
+	font-size: 56px;
+	cursor: pointer;
+}
+
+#buttons span:hover {
+	color: #00aeef;
+}
+
+#branches {
+	text-align: left;
+	display: none;
+	list-style: none;
+}
+
+#branches li.current {
+	color: #00aeef;
+}
+
+.task {
+	margin-right: 5px;
+	font-size: 20px;
+	cursor: pointer;
+}
+
+.task:hover {
+	text-decoration: underline;
+}
+
+.branch {
+	margin-right: 5px;
+	font-size: 15px;
+}
+
+.branchId {
+	display: none;
+}
+
+.button {
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+	padding: 3px 8px;
+	color: white;
+	background: #333;
+	font-size: 24px;
+	margin: 8px auto;
+	text-transform: uppercase;
+	cursor: pointer;
+	letter-spacing: 2px;
+}
+
+.button:hover {
+	background: #00aeef;
+}
+
+
+#canvas {
+	float: right;
+	margin-top: 40px;
+	background: white;
+	position: relative;
+	-webkit-box-shadow: 0px 0px 12px #333;
+	-moz-box-shadow: 0px 0px 12px #333;	
+}
+
+.row {
+	height: 10px;
+	clear: both;
+}
+
+.pixel {
+	width: 10px;
+	height: 10px;
+	float: left;
+}
+
+.pixel.off {
+	background: white;
+}
+
+.pixel.on {
+	background: black;
+}
+
+#againBox {
+	text-align: center;
+	padding: 5px 0px;
+	display: none;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.clear {
+	clear: both;
+}
+
+</style>
+	
+<script type="text/javascript">
+$(function() {
+
+branches = []	
+currentBranch = 0;
+currentFrame = 0;
+drawTimeout = 0;
+size = 50;
+
+urlParams = {}
+
+var e,
+    a = /\+/g,  // Regex for replacing addition symbol with a space
+    r = /([^&=]+)=?([^&]*)/g,
+    d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
+    q = window.location.search.substring(1);
+
+while (e = r.exec(q))
+   urlParams[d(e[1])] = d(e[2]);
+
+
+ctx = document.getElementById("cnv").getContext("2d")
+
+var getStr = "view.py"
+
+if ("task" in urlParams) {
+	getStr += "?task=" + urlParams.task
+}
+
+$.get(getStr, function(d) {
+
+	branches = d.branches
+	if (branches.length) {
+		drawPixels(branches[0]["pixels"])
+		currentFrame = branches[0]["depth"] -1
+		$("#currentFrame").html(branches[0]["depth"] + " of " + branches[0]["depth"])
+		$("#currentTask").html(toTitleCase(branches[currentBranch]["task"]))
+		
+	}
+	for (var i=0; i < branches.length; i++) {
+		var task = branches[i]["task"]
+		var branch = branches[i]["branch"]
+		var depth = branches[i]["depth"]
+		
+		
+		$("#branches").append("<li class='branch' data-id='" + i + "'><span class='task'>" + toTitleCase(task) + "</span><span class='branchId'>" + branch + ":</span><span class='depth'>- " + depth + " steps</span></li>")
+	}
+	$("#branches li").eq(0).addClass("current")
+	currentBranch = 0
+	$("#loading").hide()
+	$("#controls").show()
+	$("#branches").show()
+	$("#againBox").show()
+})
+
+
+$("#branches li").live("click", function(e) {
+	var id = parseInt($(this).attr("data-id"))
+	currentBranch = id
+	currentFrame = branches[currentBranch]["depth"] - 1
+	$("#branches li").removeClass("current")
+	$("#branches li").eq(id).addClass("current")
+	if ($("#play").hasClass("playing")) $("#play").trigger("click")
+	updateCanvas()
+})
+
+$("#play").click(function(e) {
+	if ($(this).hasClass("playing")) {
+		$(this).html("&#0155;")
+		$(this).removeClass("playing")
+		clearTimeout(drawTimeout)		
+	} else if (!("frames" in branches[currentBranch])) {
+		$("#loading").show()
+		var getStr = "view.py?id=" + branches[currentBranch]["id"]
+		$.get(getStr, function(data) {
+			branches[currentBranch]["frames"] = data.frames
+			$("#loading").hide()
+			$("#play").trigger("click")
+		})
+	} else {
+		$(this).addClass("playing")
+		$(this).html("&#0215;")
+		drawNext()
+	}
+});
+
+$("#prev").click(function() {
+	if (!("frames" in branches[currentBranch])) {
+		$("#loading").show()
+		var getStr = "view.py?id=" + branches[currentBranch]["id"]
+		$.get(getStr, function(data) {
+			branches[currentBranch]["frames"] = data.frames
+			$("#loading").hide()
+			$("#prev").trigger("click")
+		})
+	} else {
+		if ($("#play").hasClass("playing")) $("#play").trigger("click")
+		currentFrame = currentFrame == 0 ? branches[currentBranch]["depth"] - 1 : currentFrame - 1
+		updateCanvas()
+	}
+})
+	
+$("#next").click(function() {
+	if (!("frames" in branches[currentBranch])) {
+		$("#loading").show()
+		var getStr = "view.py?id=" + branches[currentBranch]["id"]
+		$.get(getStr, function(data) {
+			branches[currentBranch]["frames"] = data.frames
+			$("#loading").hide()
+			$("#next").trigger("click")
+		})
+	} else {
+		if ($("#play").hasClass("playing")) $("#play").trigger("click")
+		currentFrame = (currentFrame + 1) % branches[currentBranch]["depth"]
+		updateCanvas()
+	}
+})
+
+	
+});
+
+function updateCanvas() {
+	$("#currentFrame").html((currentFrame+1) + " of " + branches[currentBranch]["depth"])
+	$("#currentTask").html(toTitleCase(branches[currentBranch]["task"]))
+	if ("frames" in branches[currentBranch]) {
+		drawPixels(branches[currentBranch]["frames"][currentFrame])
+	} else {
+		drawPixels(branches[currentBranch]["pixels"])
+		
+	}
+}
+
+function drawNext() {
+	currentFrame = (currentFrame + 1) % branches[currentBranch]["depth"];
+	updateCanvas()
+	if (currentFrame == branches[currentBranch]["depth"] -1) {
+		$("#play").trigger("click")
+	} else {
+		drawTimeout = setTimeout("drawNext()", 300)
+	}
+}
+
+function drawPixels(pixels) {
+	var i, k
+	
+	if (pixels.length == 0) return;
+	
+	for (i = 0; i < size; i++){
+		for (k = 0; k < size; k++){
+			if (pixels[i][k]) {
+				ctx.fillStyle = "rgba(0,0,0,0.1)"
+			} else {
+				ctx.fillStyle = "rgba(255,255,255,0.1)"
+			}
+			ctx.fillRect(k*10, i*10, 10, 10)
+		}
+	}
+
+}
+
+function toTitleCase(str)
+{
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
+
+</script>	
+
+</head>
+
+<body>
+	<div id="canvas">
+		<div id="loading">Loading...</div>
+		<canvas id="cnv" width="500px" height="500px"></canvas>
+	</div>
+	<div id="controls">
+		<div id="frames" class="message">
+			<div id="currentTask"></div>
+			<div id="currentFrame"></div>
+			<div id="buttons">
+				<span id="prev">&#0171;</span><span id="play">&#0155;</span><span id="next">&#0187;</span>
+			</div>
+		</div>
+		<ul id="branches" class="message"></ul>
+		<div id="againBox"><span class="button" id="drawAgain"><a href="draw.html">Draw Again</a></span></div>
+	</div>
+
+	
+
+	
+</body>
+</html>

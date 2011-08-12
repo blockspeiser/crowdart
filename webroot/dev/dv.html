@@ -1,0 +1,576 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+	
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+
+<style>
+
+body {
+	background: #999;
+	width: 750px;
+	margin: 0px auto;
+	position: relative;
+}
+
+#controls {
+	color: black;
+	font-size: 21px;
+	padding: 40px 0px 0px 0px;
+	margin: 0px 15px;
+	width: 220px;
+}
+
+#loading {
+	background: white;
+	font-size: 34px;
+	text-align: center;
+	color: black;
+	position: absolute;
+	width: 200px;
+	top: 200px;
+	left: 50%;
+	margin-left: -100px;
+}
+
+
+.message {
+	background: #ddd;
+	border-radius: 15px;
+	-moz-border-radius: 15px;
+	-webkit-box-shadow: 0px 0px 12px #333;
+	-moz-box-shadow: 0px 0px 12px #333;
+	padding: 15px 20px;
+}
+
+#instructions {
+	font-size: 18px;
+	line-height: 1.2;
+	margin-bottom: 20px;
+	
+}
+
+#instructions .task {
+	text-align: center;
+	display: block;
+	margin: 17px 0px 22px 0px;
+	font-size: 24px;
+	font-weight: bold;
+	color: #00aeef;
+	letter-spacing: 1px;
+}
+
+#instructions #drawhow {
+	display: block;
+	margin: 22px auto; 
+	background: white;
+	padding: 8px 14px;
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	-webkit-box-shadow: 0px 0px 4px #333;
+	-moz-box-shadow: 0px 0px 4px #333;
+}
+
+.highlight {
+	font-weight: bold;
+	color: #00aeef;
+	margin: 0px 2px;
+	letter-spacing: 1px;
+}
+
+
+#instructions .actions {
+	margin-top: 30px;
+	display: none;
+	text-align: center;
+}
+
+#viewBox .button {
+	font-size: 16px;
+}
+
+#duringMessage {
+	display: none;
+	font-size: 28px;
+	text-align: center;
+}
+ 
+
+#ready {
+	font-size: 32px;
+	margin-bottom: 22px;
+}
+
+#duringMessage .task {
+	color: #00aeef;
+	letter-spacing: 1px;
+}
+
+#timer {
+	font-size: 20px;
+	margin-top: 24px;
+}
+
+#postMessage {
+	display: none;
+	text-align: center;
+	font-size: 34px;
+}
+
+#postMessage .button {
+	font-size: 16px;
+	padding: 8px;
+	margin-bottom: 16px;
+}
+
+.actions {
+	margin-top: 30px;
+	padding: 0px 15px;
+	
+}
+
+
+.actions .button {
+
+}
+
+#frames {
+	display: none;
+	margin-top: 18px;
+	text-align: center;
+}
+
+.button {
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+	padding: 3px 8px;
+	color: white;
+	background: #333;
+	font-size: 24px;
+	margin: 12px auto 4px auto;
+	text-transform: uppercase;
+	cursor: pointer;
+	letter-spacing: 2px;
+}
+
+.button:hover {
+	background: #00aeef;
+}
+
+
+#currentTask {
+	color: #00aeef;
+	font-size: 30px;
+	font-weight: bold;
+	letter-spacing: 2px;
+}
+
+#currentFrame {
+	font-size: 22px;
+}
+
+#play {
+	margin: 10px;
+}
+
+#play.playing {
+	font-size: 48px;
+}
+
+#buttons {
+	margin-top: -20px;
+	margin-bottom: -10px;
+}
+
+#buttons span {
+	font-size: 56px;
+	cursor: pointer;
+}
+
+#buttons span:hover {
+	color: #00aeef;
+}
+
+
+
+#canvas {
+	float: right;
+	margin-top: 40px;
+	width: 500px;
+	position: relative;
+	-webkit-box-shadow: 0px 0px 12px #333;
+	-moz-box-shadow: 0px 0px 12px #333;
+	
+}
+
+.row {
+	height: 10px;
+	clear: both;
+}
+
+.pixel {
+	width: 10px;
+	height: 10px;
+	float: left;
+}
+
+.pixel.off {
+	background: white;
+}
+
+.pixel.off:hover {
+	background: black;
+}
+
+.pixel.off.justClicked:hover {
+	background: white;
+}
+
+.pixel.on {
+	background: black;
+}
+
+.pixel.on:hover {
+	background: #aaa;
+}
+
+.pixel.on.justClicked:hover {
+	background: black;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.clear {
+	clear: both;
+}
+
+</style>
+	
+<script type="text/javascript">
+$(function() {
+
+
+parent = "none"
+task = ""
+visible = 1
+initialPixels = []	
+
+size = 50;
+drag = 0;
+
+urlParams = {}
+
+var e,
+    a = /\+/g,  // Regex for replacing addition symbol with a space
+    r = /([^&=]+)=?([^&]*)/g,
+    d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
+    q = window.location.search.substring(1);
+
+while (e = r.exec(q))
+   urlParams[d(e[1])] = d(e[2]);
+
+for (i = 0; i < size; i++){
+	$("#canvas").append("<div class='row'></div>")
+	for (k = 0; k < size; k++){
+		$(".row").last().append("<div class='pixel off'></div")
+	}
+}
+
+/* Drag Draw 
+
+$(document).bind("dragstart", function() {
+     return false;
+});
+
+$(document).mousedown(function() {
+	drag = 1	
+	return false
+})
+
+$(document).mouseup(function() {
+	drag = 0;
+	return false;
+})
+
+$(".pixel").mouseenter(function() {
+	if (drag == 1) {
+		togglePixel($(this))
+	}
+})
+
+*/
+
+$(".pixel").click(function() {
+	togglePixel($(this))
+	$(this).addClass("justClicked")
+})
+
+$(".pixel").mouseleave(function() {
+	$(this).removeClass("justClicked")
+})
+
+function togglePixel($p) {
+	if ($p.hasClass("on")) {
+		$p.removeClass("on").addClass("off")
+	} else {
+		$p.removeClass("off").addClass("on")
+	}
+}
+
+
+
+// load Initial Frame
+getStr = "next.py"
+
+if ("task" in urlParams) {
+	getStr += "?task=" + urlParams["task"]
+	if ("visible" in urlParams) getStr += "&visible=" + parseInt(urlParams["visible"])
+}
+
+
+$.get(getStr, function(d) {
+	if ("error" in d) {
+		alert("Problem! " + d["error"])
+		return;
+	}
+	$("#loading").hide()
+	drawHtmlPixels(d["pixels"])
+	initialPixels = d["pixels"]
+	parent = d["id"]
+	task = d["task"]
+	if ("visible" in d) visible = d["visible"]
+	
+	$(".task").html(toTitleCase(task))
+	
+	$("#canvas").click(function() {
+		$("#loading").css("color", "#00aeef").html("Practicing...").show()
+	})
+	
+	$("#instructions .actions").show()
+	$("#start").click(function(){
+		$("#canvas").unbind("click")
+		$("#loading").hide()
+		$("#start").hide()
+		$("#instructions").hide()
+		$("#duringMessage").show()
+		drawHtmlPixels(initialPixels)
+		
+		setTimeout('$("#ready").html("Go!"); setTimeout("updateTimer()", 1000);', 2000)
+	})
+})
+
+
+$("#history").click(function() {
+	if (!id) {
+		return
+	}
+	
+	$("#history").hide()
+	$("#currentTask").html(toTitleCase(task))
+	$("#frames").show()
+	
+	
+	var getStr = "view.py?id=" + id
+	$.get(getStr, function(data) {
+		frames = data.frames
+		depth = data.depth
+		currentFrame = data.depth - 1
+		$("#currentFrame").html(depth + " of " + depth)
+		$("#loading").hide()
+		
+		$(".row").remove()
+		$("#canvas").append('<canvas id="cnv" height="500px" width="500px"></canvas>')
+		ctx = document.getElementById("cnv").getContext("2d")
+		drawPixels(frames[currentFrame])
+	})
+})
+
+$("#play").click(function(e) {
+	if ($(this).hasClass("playing")) {
+		$(this).html("&#0155;")
+		$(this).removeClass("playing")
+		clearTimeout(drawTimeout)		
+	} else {
+		$(this).addClass("playing")
+		$(this).html("&#0215;")
+		drawNext()
+	}
+});
+
+$("#prev").click(function() {
+		if ($("#play").hasClass("playing")) $("#play").trigger("click")
+		currentFrame = currentFrame == 0 ? branches[currentBranch]["depth"] - 1 : currentFrame - 1
+		updateCanvas()
+})
+	
+$("#next").click(function() {
+		if ($("#play").hasClass("playing")) $("#play").trigger("click")
+		currentFrame = (currentFrame + 1) % branches[currentBranch]["depth"]
+		updateCanvas()
+})
+
+	
+});
+
+function updateTimer() {
+	t = parseInt($("#time").html());
+	if (t == 0) {
+		$(".pixel").unbind("click")
+		$(".pixel").unbind("mouseleave")
+		$("#loading").css("color", "#00aeef").html("Time's Up!").show()
+		$("#duringMessage").hide()
+		$("#postMessage").show()
+		saveCanvas()
+	} else {
+		$("#time").html(t-1);
+		setTimeout("updateTimer()", 1000)
+	}
+	
+	if (t == 5) $("#timer").css("color", "red")
+}
+
+function saveCanvas() {
+	var i, k;
+	var $row;
+	var pixels = {};
+	var post = {}
+	var postJSON = {}
+	
+	
+	for (i = 0; i < size; i++){
+		pixels[i] = []
+		$row = $(".row").eq(i)
+		for (k = 0; k < size; k++){
+			pixels[i][k] =	$(".pixel", $row).eq(k).hasClass("on") ? 1 : 0;
+		}
+	}
+	
+	post["pixels"] = pixels;
+	post["parent"] = parent;
+	post["task"] = task;
+	post["visible"] = visible;
+	
+ 	postJSON= JSON.stringify(post);
+ 
+	$.post("save.py", {"json": postJSON}, function(data) {
+		if (data.result.id) {
+			id = data.result.id
+		} else {
+			alert("Wha-oh... looks like your drawing didn't save :(")
+		}
+	})
+ 
+}
+
+function drawHtmlPixels(pixels) {
+	var i, k
+	
+	if (pixels.length == 0) return;
+	
+	for (i = 0; i < size; i++){
+		$row = $(".row").eq(i)
+		for (k = 0; k < size; k++){
+			if (pixels[i][k]) {
+				$(".pixel", $row).eq(k).addClass("on").removeClass("off")
+			} else {
+				$(".pixel", $row).eq(k).addClass("off").removeClass("on")
+				
+			}
+		}
+	}
+
+}
+
+
+function updateCanvas() {
+	$("#currentFrame").html((currentFrame+1) + " of " + depth)
+	$("#currentTask").html(toTitleCase(task))
+	drawPixels(frames[currentFrame])
+
+}
+
+function drawNext() {
+	currentFrame = (currentFrame + 1) % depth;
+	updateCanvas()
+	if (currentFrame == depth -1) {
+		$("#play").trigger("click")
+	} else {
+		drawTimeout = setTimeout("drawNext()", 300)
+	}
+}
+
+function drawPixels(pixels) {
+	var i, k
+	
+	if (pixels.length == 0) return;
+	
+	for (i = 0; i < size; i++){
+		for (k = 0; k < size; k++){
+			if (pixels[i][k]) {
+				ctx.fillStyle = "black"
+			} else {
+				ctx.fillStyle = "white"
+			}
+			ctx.fillRect(k*10, i*10, 10, 10)
+		}
+	}
+
+}
+
+function toTitleCase(str)
+{
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
+
+</script>	
+</head>
+
+<body>
+	<div id="canvas"><div id="loading">Loading...</div></div>
+	
+	<div id="controls">
+		<div id="instructions" class="message">
+
+			This is a group drawing in progress of a: <span class="task">...</span>
+			You have <span class="highlight">30</span> seconds to make it a little better.
+			<img id="drawhow" src="drawhow.png"></img>
+			<span class="highlight">Practice</span> drawing first, then hit start to begin.
+		
+		
+			<div class="actions">
+				<span id="start" class="button">Start</span>
+			</div>
+		</div>	
+		<div id="viewBox" class="message">
+			<span class="button">View<br>Drawings</span>
+		</div>
+		<div id="duringMessage" class="message">
+			<div id="ready" class="highlight">Get ready...</div>
+			Draw a <span class="task"></span>
+			<div id="timer">You have <span id="time">30</span> seconds.</div>
+		</div>
+	
+		<div id="postMessage" class="message">
+			Thanks for contributing!
+			<div class="actions">
+				<div class="button" id="history">Watch Drawing History</div>
+				<div class="button"><a href="draw.html">Draw Again</a></div>
+				<div class="button"><a href="view.html">View All Drawings</a></div>
+			</div>
+		
+		</div>	
+		<div id="frames" class="message">
+			<div id="currentTask"></div>
+			<div id="currentFrame">Loading...</div>
+			<div id="buttons">
+				<span id="prev">&#0171;</span><span id="play">&#0155;</span><span id="next">&#0187;</span>
+			</div>
+		</div>
+
+	</div>
+</body>
+</html>
