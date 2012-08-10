@@ -28,6 +28,7 @@ def showGrids():
 
 	return response_body		
 	
+	
 @route("/grids/view/:name")
 def showOneGrid(name):
 	f = open('/var/www/crowdart/view.html', 'r')
@@ -37,9 +38,8 @@ def showOneGrid(name):
 	response_body = response_body.replace('branches = []', "branches = %s" % json.dumps(getGrid(name)))
 	response_body = response_body.replace('task = ""', 'task = "%s"' % name)
 
-	
-
 	return response_body		
+
 	
 @route("/grids/draw")	
 @route("/grids/draw/")

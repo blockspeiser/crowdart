@@ -9,6 +9,7 @@ from datetime import datetime
 
 connection = pymongo.Connection()
 db = connection.crowdart
+db.authenticate("crowdart", "crizowd99")
 grids = db.grids
 
 
@@ -16,7 +17,7 @@ def getGrid(name=None):
 	"""
 	Take a name (which can be an id, task, or branch id) 
 	
-	Return a dictionary or array dictionaries of matching grids
+	Return a dictionary or array of dictionaries of matching grids
 	"""
 		
 	response = {}
