@@ -54,6 +54,7 @@ def getGrid(name=None):
 	
 	return response
 
+
 def getBranches(task=None):
 	"""
 	Returns an array of terminal nodes (excluding pixels)
@@ -77,6 +78,7 @@ def getBranches(task=None):
 	
 	return branches
 
+
 def getFrames(gridId):
 	"""
 	Take a grid ID and return an array of all preceding frames.
@@ -89,6 +91,7 @@ def getFrames(gridId):
 		frame = db.gridbits.find_one({"id": frame["parent"]})
 	
 	return frames
+
 
 def assignGrid(task=None):
 		
@@ -120,7 +123,7 @@ def saveGrid(grid):
 	
 	# Give it an ID
 	lastId = db.gridbits.find().sort([['id', -1]]).limit(1)
-	grid["id"] = lastId.next()["id"] + 1
+	grid["id"] = lastId.next()["id"] + 1 if lastId.count() else 1
 	
 	grid["children"] = 0
 	grid["active"] = 1
@@ -159,6 +162,7 @@ def saveGrid(grid):
 
 	return ({"result": {"id": grid["id"]}})
 
+
 def newGrid(name):
 
 	grid  = {
@@ -177,6 +181,7 @@ def newGrid(name):
 	
 	return saveGrid(grid)
 
+
 def packPixels(pixels):
 	
 	bits = []
@@ -192,6 +197,7 @@ def packPixels(pixels):
 		bits.append(dec)		
 	
 	return bits
+
 
 def unpackPixels(bitsArray):
 
@@ -212,9 +218,11 @@ def unpackPixels(bitsArray):
 
 	return pixelsArray
 
+
 def baseN(num,b):
   return ((num == 0) and  "0" ) or ( baseN(num // b, b).lstrip("0") + "0123456789abcdefghijklmnopqrstuvwxyz"[num % b])	
-		
+
+
 def makeBits():
 	
 	grids = db.grids.find()

@@ -1,16 +1,22 @@
 import sys
-sys.path.insert(0, "/var/www/crowdart/")
+import os
+PATH = os.path.dirname(__file__)
+sys.path.insert(0, PATH)
 import simplejson as json
 from bottlez import *
 from crowdart import *
+
 
 # --------------- APP ---------------
 
 @route("/")
 def home():
-	f = open('/var/www/crowdart/home.html', 'r')
+	f = open(PATH + '/home.html', 'r')
 	response_body = f.read()
 	f.close()
+
+	response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
+	
 	return response_body	
 
 @route("/grids")
@@ -19,24 +25,25 @@ def home():
 @route("/grids/view/")
 @route("/grids/view.html")
 def showGrids():
-	f = open('/var/www/crowdart/view.html', 'r')
+	f = open(PATH + '/view.html', 'r')
 	response_body = f.read()
 	f.close()
 
 	response_body = response_body.replace('branches = []', "branches = %s" % json.dumps(getGrid()))
-
+	response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
 
 	return response_body		
 	
 	
 @route("/grids/view/:name")
 def showOneGrid(name):
-	f = open('/var/www/crowdart/view.html', 'r')
+	f = open(PATH + '/view.html', 'r')
 	response_body = f.read()
 	f.close()
 
 	response_body = response_body.replace('branches = []', "branches = %s" % json.dumps(getGrid(name)))
 	response_body = response_body.replace('task = ""', 'task = "%s"' % name)
+	response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
 
 	return response_body		
 
@@ -45,16 +52,18 @@ def showOneGrid(name):
 @route("/grids/draw/")
 @route("/grids/draw.html")
 def showDraw():
-	f = open('/var/www/crowdart/draw.html', 'r')
+	f = open(PATH + '/draw.html', 'r')
 	response_body = f.read()
 	f.close()
 	response_body = response_body.replace('"ASSIGNMENT"', json.dumps(assignGrid()))
+	response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
 
 	return response_body
 	
+
 @route("/grids/draw/:name")
 def showOneDraw(name):
-	f = open('/var/www/crowdart/draw.html', 'r')
+	f = open(PATH + '/draw.html', 'r')
 	response_body = f.read()
 	f.close()
 	
@@ -64,6 +73,7 @@ def showOneDraw(name):
 	except ValueError:
 		grid = assignGrid(name)
 	response_body = response_body.replace('"ASSIGNMENT"', json.dumps(grid))
+	response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
 
 	return response_body
 
@@ -78,6 +88,7 @@ def gridListAPI():
 @get("/api/grids/assign/")
 def assignGridAPI():
 	return assignGrid()	
+
 
 @get("/api/grids/new/:name")
 def newGridAPI(name):
@@ -127,6 +138,7 @@ def saveGridAPI():
 		return {"error": "No postdata."}
 	return saveGrid(json.loads(j))
 
+
 @get("/api/grids/deactivate/:gridId")
 def deactivateAPI(gridId):
 	grid = db.gridbits.find_one({"id": int(gridId)})
@@ -134,6 +146,7 @@ def deactivateAPI(gridId):
 	db.gridbits.save(grid)
 	del grid["_id"]
 	return grid
+
 
 @get("/api/grids/activate/:gridId")
 def deactivateAPI(gridId):
