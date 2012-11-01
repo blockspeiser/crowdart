@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+	<style>
+		canvas {
+
+		}
+	</style>
+</head>
+<body>
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+<script>
+
+size = 50;
+zoom = 3;
+canvas_size = size * zoom;
+branch = [];
+canvas =[];
+
+$(function() {
+	for (var i = 0; i < branch.length; i++){
+		$("body").append("<canvas id='"+i+"' width='"+canvas_size+"px' height='"+canvas_size+"px'></canvas>");
+		canvas[i] = $("canvas").last().get(0).getContext("2d")
+		drawPixels(branch[i]["pixels"], canvas[i])
+	}
+
+	$("canvas").mouseover(function() {
+		if ($(this).hasClass("playing")) return;
+
+
+	});
+});
+
+
+function drawPixels(pixels, ctx) {
+	var i, k
+	pixels = unpackPixels(pixels)
+	
+	if (pixels.length == 0) return;
+	
+	for (i = 0; i < size; i++){
+		for (k = 0; k < size; k++){
+			if (pixels[i][k]) {
+				ctx.fillStyle = "black"
+			} else {
+				ctx.fillStyle = "white"
+			}
+			ctx.fillRect(k*zoom, i*zoom, zoom, zoom)
+		}
+	}
+
+}
+
+function unpackPixels(bitsArray) {
+
+	var pixelsArray = []
+	
+	for (var i =0; i < bitsArray.length; i++) {
+		var bitsString = bitsArray[i].toString(2).slice(1)
+		var pixels = []
+		while(bitsString) {
+			bit =  bitsString[0]			
+			pixels.push(bit == "1" ? 1 : 0)
+			bitsString = bitsString.slice(1)
+		}
+		
+		for (var k = pixels.length; k < 50; k++) {
+			pixels.push(0)
+		}
+		
+		pixelsArray.push(pixels.slice())
+	}
+
+	return pixelsArray
+}
+
+</script>
+</body>
+</html>
