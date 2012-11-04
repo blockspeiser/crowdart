@@ -1,10 +1,108 @@
 <!doctype html>
 <html>
 <head>
+	<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet">
 	<style>
-		canvas {
-
+		body {
+			text-align: center;
+			font-family: "Times New Roman",Times,serif;
 		}
+		.box {
+			display: inline-block;
+			position: relative;
+			overflow: visible;
+			cursor: pointer;
+			border: 1px solid white;
+		}
+
+		.info {
+			display: none;
+			position: absolute;
+			height: 25px;
+			line-height: 25px;
+			font-size: 18px;
+			letter-spacing: 1px;
+			background-color: #0e0e0e;
+			color: white;
+			z-index: 1;
+			width: 100%;
+			bottom: 0px;
+			left: 0;
+		}
+
+		.box .btn, .box .steps {
+			display: none;
+		}
+
+		.box:hover {
+			z-index: 1;
+		}
+
+		.box:hover .info {
+			display: block;
+			z-index: 1;
+			border-radius: 5px;
+			box-shadow: 0px 0px 10px #03f;
+			border: 1px solid #aaa;
+		}
+
+		.box.big {
+			position: fixed;
+			width: 100%;
+			height: 100%;
+			top: 0;
+			left: 0;
+			background: transparent;
+			z-index: 10;
+		}
+
+		.box.big canvas {
+			width: 600px;
+			height: 600px;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			margin: -270px 0 0 -300px;
+			z-index: 2;
+		}
+
+
+		.box.big .info {
+			height: 55px;
+			line-height: 55px;
+			font-size: 40px;
+			border-radius: 0;
+			z-index: 3;
+			top: 0;
+			bottom: auto;
+			box-shadow: none;
+		}
+
+		.box.big .name {
+			display: inline-block;
+		}
+
+		.box.big .btn {
+			display: inline-block;
+			position:absolute;
+			top: 6px;
+			right: 14px;
+		}
+
+		.box.big .steps {
+			display: inline-block;
+			margin-left: 15px;
+			font-size: 18px;
+		}
+
+		.box.big .underlay {
+			width: 100%;
+			height: 100%;
+			background-color: white;
+			opacity: 0.9;
+			z-index: 1;
+		}
+
 	</style>
 </head>
 <body>
@@ -15,38 +113,94 @@
 size = 50;
 zoom = 3;
 canvas_size = size * zoom;
+speed = 300;
 branch = [];
 canvas =[];
 
 $(function() {
 	for (var i = 0; i < branch.length; i++){
-		$("body").append("<canvas id='"+i+"' width='"+canvas_size+"px' height='"+canvas_size+"px'></canvas>");
+		var html = "<div class='box'>" +
+					"<canvas id='"+i+"' width='"+canvas_size+"px' height='"+canvas_size+"px'></canvas>" +
+					"<div class='info'>" + 
+						"<div class='name'>" + branch[i].task + "</div>" +
+						"<div class='steps'></div>" +
+						"<a class='btn btn-info btn-large' href='/grids/draw/" + branch[i].id + "'>Continue this Drawing</a>" +
+					"</div>" +
+					"<div class='underlay'></div>" +
+				   "</div>";
+		$("body").append(html);
 		canvas[i] = $("canvas").last().get(0).getContext("2d")
 		drawPixels(branch[i]["pixels"], canvas[i])
 	}
 
 	$("canvas").mouseover(function() {
-		if ($(this).hasClass("playing")) return;
-
-
+		if ($(this).hasClass("hasFrames")) return;
+		var id = parseInt(this.id);
+		var callback = (function(id){ 
+			return function(data) {
+				branch[id]["frames"] = data["frames"];
+				$("#" + id).closest(".box").find(".steps").html(data["frames"].length + " steps");
+				play(id);
+			}
+		})(id);
+		$.getJSON("/api/grids/bits/" + branch[id]["id"], callback);
+		$(this).addClass("hasFrames");
 	});
+
+	$(".box").on("click touch", function(e) {
+		$(this).toggleClass("big");
+	});
+
+	$(".box a").on("click touch", function(e) {e.stopPropagation() });
+
 });
 
 
-function drawPixels(pixels, ctx) {
-	var i, k
-	pixels = unpackPixels(pixels)
+function Grid() {
+
+
+}
+
+
+function play(id) {
 	
+	var br = branch[id];
+
+	if (!br.currentFrame) {
+		br["currentFrame"] = 0;
+	}
+
+	var playNext = function() {
+		if (br["currentFrame"] === br["frames"].length) {
+			br["currentFrame"] = 0;
+		}
+		drawPixels(br["frames"][br["currentFrame"]], canvas[id]);
+
+		br["currentFrame"] += 1;
+	};
+
+	br["playTimer"] = setInterval(playNext, speed);
+
+}
+
+function drawPixels(pixels, ctx) {
+	var i, k;
+	pixels = unpackPixels(pixels);
+	
+	var cSize = ctx.canvas.width;
+	var cZoom = cSize / size;
+
+
 	if (pixels.length == 0) return;
 	
 	for (i = 0; i < size; i++){
 		for (k = 0; k < size; k++){
 			if (pixels[i][k]) {
-				ctx.fillStyle = "black"
+				ctx.fillStyle = "black";
 			} else {
-				ctx.fillStyle = "white"
+				ctx.fillStyle = "white";
 			}
-			ctx.fillRect(k*zoom, i*zoom, zoom, zoom)
+			ctx.fillRect(k*cZoom, i*cZoom, cZoom, cZoom);
 		}
 	}
 
