@@ -6,7 +6,34 @@
 		body {
 			text-align: center;
 			font-family: "Times New Roman",Times,serif;
+			padding-top: 55px;
 		}
+
+		#about {
+			position: fixed;
+			top: 0;
+			left: 0;
+			color: white;
+			font-size: 19px;
+			height: 55px;
+			line-height: 55px;
+			background: #0e0e0e;
+			width: 100%;
+			letter-spacing: 1px;
+			z-index: 10;
+		}
+
+		#about .btn {
+			position: absolute;
+			top: 6px;
+			right: 14px;
+		}
+
+		#social {
+			z-index: 11;
+			top: -1px !important; 
+		}
+
 		.box {
 			display: inline-block;
 			position: relative;
@@ -54,6 +81,7 @@
 			left: 0;
 			background: transparent;
 			z-index: 10;
+			border: 0;
 		}
 
 		.box.big canvas {
@@ -64,6 +92,7 @@
 			left: 50%;
 			margin: -270px 0 0 -300px;
 			z-index: 2;
+			box-shadow: 0px 0px 7px #333;
 		}
 
 
@@ -76,6 +105,7 @@
 			top: 0;
 			bottom: auto;
 			box-shadow: none;
+			border: 0;
 		}
 
 		.box.big .name {
@@ -106,7 +136,9 @@
 	</style>
 </head>
 <body>
-
+<div id="about">
+	These are collaborative drawings. Each contributor had just 30 seconds to make changes. <a class="btn btn-large btn-info" href="/grids/draw">Draw</a>
+</div>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
 <script>
 
@@ -139,7 +171,8 @@ $(function() {
 		var callback = (function(id){ 
 			return function(data) {
 				branch[id]["frames"] = data["frames"];
-				$("#" + id).closest(".box").find(".steps").html(data["frames"].length + " steps");
+				var steps = data["frames"].length > 1 ? data["frames"].length + " steps" : "new drawing!";
+				$("#" + id).closest(".box").find(".steps").html(steps);
 				play(id);
 			}
 		})(id);

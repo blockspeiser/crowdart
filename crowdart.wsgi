@@ -21,27 +21,13 @@ def home():
 
 @route("/grids")
 @route("/grids/")
-@route("/grids/view")
-@route("/grids/view/")
-@route("/grids/view.html")
-def showGrids():
-	f = open(PATH + '/view.html', 'r')
-	response_body = f.read()
-	f.close()
-
-	response_body = response_body.replace('branches = []', "branches = %s" % json.dumps(getGrid()))
-	response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
-
-	return response_body		
-	
-
-@route("/grids/view/all")
 def showAll():
 	f = open(PATH + '/view_all.html', 'r')
 	response_body = f.read()
 	f.close()
 	
 	response_body = response_body.replace('branch = [];', "branch = %s;" % json.dumps(getGrid()["branches"]));
+	response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
 
 	return response_body
 
@@ -61,7 +47,6 @@ def showOneGrid(name):
 
 @route("/grids/draw")	
 @route("/grids/draw/")
-@route("/grids/draw.html")
 def showDraw():
 	f = open(PATH + '/draw.html', 'r')
 	response_body = f.read()

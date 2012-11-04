@@ -8,9 +8,7 @@
 <style>
 
 body {
-	background: #999;
 	font-family: "Times New Roman", Times, serif;
-
 }
 
 #content {
@@ -22,7 +20,7 @@ body {
 }
 
 #controls {
-	color: black;
+	color: #0e0e0e;
 	font-size: 21px;
 	padding: 0px;
 	margin: 0px 15px;
@@ -43,11 +41,6 @@ body {
 
 
 .message {
-	background: #ddd;
-	border-radius: 15px;
-	-moz-border-radius: 15px;
-	-webkit-box-shadow: 0px 0px 12px #333;
-	-moz-box-shadow: 0px 0px 12px #333;
 	padding: 15px 20px;
 }
 
@@ -74,9 +67,7 @@ body {
 	background: white;
 	padding: 8px 14px;
 	border-radius: 10px;
-	-moz-border-radius: 10px;
-	-webkit-box-shadow: 0px 0px 4px #333;
-	-moz-box-shadow: 0px 0px 4px #333;
+	box-shadow: 0px 0px 4px #333;
 }
 
 .highlight {
@@ -164,7 +155,6 @@ body {
 
 .button {
 	border-radius: 8px;
-	-moz-border-radius: 8px;
 	padding: 3px 14px;
 	color: white;
 	background: #00aeef;
@@ -173,15 +163,12 @@ body {
 	text-transform: uppercase;
 	cursor: pointer;
 	letter-spacing: 2px;
-	-webkit-box-shadow: 0px 0px 7px #333;
-	-moz-box-shadow: 0px 0px 7px #333;	
+	box-shadow: 0px 0px 7px #333;
 }
 
 .button:hover {
 	background: #333;
 }
-
-
 
 #currentTask {
 	color: #00aeef;
@@ -217,15 +204,11 @@ body {
 	color: #00aeef;
 }
 
-
-
 #canvas {
 	float: right;
 	width: 600px;
 	position: relative;
-	-webkit-box-shadow: 0px 0px 12px #333;
-	-moz-box-shadow: 0px 0px 12px #333;
-	
+	box-shadow: 0px 0px 12px #333;	
 }
 
 #cnv {
@@ -233,6 +216,8 @@ body {
 	top: 0px;
 	bottom: 0px;	
 	z-index: 1;
+	box-shadow: 0px 0px 12px #333;	
+
 }
 
 .row {
@@ -656,7 +641,7 @@ function unpackPixels(bitsArray) {
 			<div class="actions">
 				<div class="button"><a href="/grids/draw">Draw Again</a></div>
 				<div class="button" id="history">Watch Drawing History</div>
-				<div class="button"><a href="/grids/view">View Other Drawings</a></div>
+				<div class="button"><a href="/grids">View Other Drawings</a></div>
 			</div>
 		
 		</div>	
