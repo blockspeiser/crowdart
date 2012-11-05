@@ -129,6 +129,10 @@
 			font-size: 18px;
 		}
 
+		.red {
+			color: red;
+		}
+
 		.box.big .underlay {
 			width: 100%;
 			height: 100%;
@@ -153,21 +157,37 @@ canvas_size = size * zoom;
 speed = 300;
 branch = [];
 canvas =[];
+playlist = [];
+playlistSpeed = 1000;
 
 $(function() {
+
+	var width = $(window).width();
+	zoom = width < 400 ? width < 200 ? 1 : 2 : 3;
+
 	for (var i = 0; i < branch.length; i++){
 		var html = "<div class='box'>" +
 					"<canvas id='"+i+"' width='"+canvas_size+"px' height='"+canvas_size+"px'></canvas>" +
 					"<div class='info'>" + 
 						"<div class='name'>" + branch[i].task + "</div>" +
-						"<div class='steps'></div>" +
+						"<div class='steps'><span class='red'>Loading...</span></div>" +
 						"<a class='btn btn-info btn-large' href='/grids/draw/" + branch[i].id + "'>Continue this Drawing</a>" +
 					"</div>" +
 					"<div class='underlay'></div>" +
 				   "</div>";
 		$("body").append(html);
-		canvas[i] = $("canvas").last().get(0).getContext("2d")
-		drawPixels(branch[i]["pixels"], canvas[i])
+		canvas[i] = $("canvas").last().get(0).getContext("2d");
+		playlist.push(i);
+		drawPixels(branch[i]["pixels"], canvas[i]);
+	}
+
+	playlist = shuffle(playlist);
+
+	for (var i = 0; i < playlist.length; i++) {
+		setTimeout(function() {
+			var next = playlist.pop();
+			$("#" + next).trigger("mouseover");
+		}, playlistSpeed*i);
 	}
 
 	$("canvas").mouseover(function() {
@@ -266,6 +286,11 @@ function unpackPixels(bitsArray) {
 
 	return pixelsArray
 }
+
+shuffle = function(o){ //v1.0
+	for(var j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+	return o;
+};
 
 </script>
 </body>

@@ -6,6 +6,7 @@ import cgi
 import simplejson
 from os import getenv 
 from datetime import datetime
+from random import random, choice
 
 connection = pymongo.Connection()
 db = connection.crowdart
@@ -160,6 +161,10 @@ def saveGrid(grid):
 		
 	db.gridbits.insert(grid)
 
+	if random() > 0.9:
+		name = choice(seeds)
+		newGrid(name)
+
 	return ({"result": {"id": grid["id"]}})
 
 
@@ -238,3 +243,37 @@ def makeBits():
 		db.gridbits.save(grid)
 		grid = grids.next()
 	
+
+seeds = [
+"lamp",
+"fairy",
+"punch",
+"tooth",
+"beer",
+"tiger",
+"hippo",
+"aligator",
+"proposal",
+"date",
+"gesture",
+"party",
+"pig",
+"dolphin",
+"unicorn",
+"toad",
+"snail",
+"brawl",
+"game",
+"meal",
+"squid",
+"lake",
+"church",
+"victory",
+"shrimp",
+"taco",
+"rocket",
+"cop",
+"president",
+"firefighter",
+"village",
+]
