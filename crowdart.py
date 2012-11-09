@@ -161,7 +161,7 @@ def saveGrid(grid):
 		
 	db.gridbits.insert(grid)
 
-	if random() > 0.9:
+	if random() > 0.95:
 		name = choice(seeds)
 		newGrid(name)
 
@@ -245,9 +245,7 @@ def makeBits():
 	
 
 seeds = [
-"lamp",
 "fairy",
-"punch",
 "tooth",
 "beer",
 "tiger",
@@ -262,13 +260,11 @@ seeds = [
 "unicorn",
 "toad",
 "snail",
-"brawl",
 "game",
 "meal",
 "squid",
 "lake",
 "church",
-"victory",
 "shrimp",
 "taco",
 "rocket",
@@ -276,4 +272,5 @@ seeds = [
 "president",
 "firefighter",
 "village",
+"zelda",
 ]
