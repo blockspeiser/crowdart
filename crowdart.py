@@ -14,7 +14,7 @@ db.authenticate("crowdart", "crizowd99")
 grids = db.grids
 
 
-def getGrid(name=None):
+def get_grid(name=None):
 	"""
 	Take a name (which can be an id, task, or branch id) 
 	
@@ -29,7 +29,7 @@ def getGrid(name=None):
 		if not grid:
 			return None
 		del grid["_id"]
-		frames = getFrames(name)
+		frames = get_frames(name)
 		if frames:
 			grid["frames"] = frames
 			
@@ -56,7 +56,7 @@ def getGrid(name=None):
 	return response
 
 
-def getBranches(task=None):
+def get_branches(task=None):
 	"""
 	Returns an array of terminal nodes (excluding pixels)
 	"""
@@ -80,7 +80,7 @@ def getBranches(task=None):
 	return branches
 
 
-def getFrames(gridId):
+def get_frames(gridId):
 	"""
 	Take a grid ID and return an array of all preceding frames.
 	"""
@@ -94,7 +94,7 @@ def getFrames(gridId):
 	return frames
 
 
-def assignGrid(task=None):
+def assign_grid(task=None):
 		
 	findMap = {"children": 0, "active": {"$ne": 0}}
 	if task:
@@ -116,7 +116,7 @@ def assignGrid(task=None):
 	return next
 
 
-def saveGrid(grid):
+def save_grid(grid):
 	
 	for key in ("parent", "pixels"):
 		if not key in grid:
@@ -128,7 +128,7 @@ def saveGrid(grid):
 	
 	grid["children"] = 0
 	grid["active"] = 1
-	grid["pixels"] = packPixels(grid["pixels"])
+	grid["pixels"] = pack_pixels(grid["pixels"])
 	grid["lastAssigned"] = datetime.now().isoformat()
 	
 	ipaddr = (getenv("HTTP_CLIENT_IP") or getenv("HTTP_X_FORWARDED_FOR") or getenv("HTTP_X_FORWARDED_FOR") or getenv("REMOTE_ADDR") or "UNKNOWN")
@@ -163,12 +163,12 @@ def saveGrid(grid):
 
 	if random() > 0.95:
 		name = choice(seeds)
-		newGrid(name)
+		new_grid(name)
 
 	return ({"result": {"id": grid["id"]}})
 
 
-def newGrid(name):
+def new_grid(name):
 
 	grid  = {
 		"task": name,
@@ -184,10 +184,10 @@ def newGrid(name):
 	
 	grid["pixels"] = p
 	
-	return saveGrid(grid)
+	return save_grid(grid)
 
 
-def packPixels(pixels):
+def pack_pixels(pixels):
 	
 	bits = []
 	
@@ -204,12 +204,12 @@ def packPixels(pixels):
 	return bits
 
 
-def unpackPixels(bitsArray):
+def unpack_pixels(bitsArray):
 
 	pixelsArray = []
 	
 	for i in range(len(bitsArray)):
-		bitsString = baseN(bitsArray[i],2)[1:]
+		bitsString = base_n(bitsArray[i],2)[1:]
 		pixels = []
 		while(bitsString): 
 			bit =  bitsString[0]			
@@ -224,11 +224,11 @@ def unpackPixels(bitsArray):
 	return pixelsArray
 
 
-def baseN(num,b):
-  return ((num == 0) and  "0" ) or ( baseN(num // b, b).lstrip("0") + "0123456789abcdefghijklmnopqrstuvwxyz"[num % b])	
+def base_n(num,b):
+  return ((num == 0) and  "0" ) or ( base_n(num // b, b).lstrip("0") + "0123456789abcdefghijklmnopqrstuvwxyz"[num % b])	
 
 
-def makeBits():
+def make_bits():
 	
 	grids = db.grids.find()
 	db.gridbits.remove()
@@ -237,7 +237,7 @@ def makeBits():
 	while grid:
 		del grid["_id"]
 		try:
-			grid["pixels"] = packPixels(grid["pixels"])
+			grid["pixels"] = pack_pixels(grid["pixels"])
 		except KeyError:
 			print "No pixels in grid %d" % (grid["id"])
 		db.gridbits.save(grid)

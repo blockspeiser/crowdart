@@ -26,7 +26,7 @@ def showAll():
 	response_body = f.read()
 	f.close()
 	
-	response_body = response_body.replace('branch = [];', "branch = %s;" % json.dumps(getGrid()["branches"]));
+	response_body = response_body.replace('branch = [];', "branch = %s;" % json.dumps(get_grid()["branches"]));
 	response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
 
 	return response_body
@@ -38,7 +38,7 @@ def showOneGrid(name):
 	response_body = f.read()
 	f.close()
 
-	response_body = response_body.replace('branches = []', "branches = %s" % json.dumps(getGrid(name)))
+	response_body = response_body.replace('branches = []', "branches = %s" % json.dumps(get_grid(name)))
 	response_body = response_body.replace('task = ""', 'task = "%s"' % name)
 	response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
 
@@ -51,7 +51,7 @@ def showDraw():
 	f = open(PATH + '/draw.html', 'r')
 	response_body = f.read()
 	f.close()
-	response_body = response_body.replace('"ASSIGNMENT"', json.dumps(assignGrid()))
+	response_body = response_body.replace('"ASSIGNMENT"', json.dumps(assign_grid()))
 	response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
 
 	return response_body
@@ -65,9 +65,9 @@ def showOneDraw(name):
 	
 	try:
 		gridId = int(name)
-		grid = getGrid(gridId)
+		grid = get_grid(gridId)
 	except ValueError:
-		grid = assignGrid(name)
+		grid = assign_grid(name)
 	response_body = response_body.replace('"ASSIGNMENT"', json.dumps(grid))
 	response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
 
@@ -78,17 +78,17 @@ def showOneDraw(name):
 
 @get("/api/grids/")
 def gridListAPI():
-	return getGrid()
+	return get_grid()
 
 	
 @get("/api/grids/assign/")
-def assignGridAPI():
-	return assignGrid()	
+def assign_gridAPI():
+	return assign_grid()	
 
 
 @get("/api/grids/new/:name")
 def newGridAPI(name):
-	return newGrid(name)
+	return new_grid(name)
 
 
 @get("/api/grids/branches/")
@@ -96,32 +96,32 @@ def branchesAPI():
 	"""
 	Return a list of branches without frames
 	"""
-	return {"branches": json.dumps(getBranches())}
+	return {"branches": json.dumps(get_branches())}
 	
 
 @get("/api/grids/bits/")
 def gridListBitsAPI():
-	return getGrid()
+	return get_grid()
 
 @get("/api/grids/bits/:name")
 def gridBitsAPI(name):
 	try:
 		gridId = int(name)
-		return getGrid(gridId)
+		return get_grid(gridId)
 	except ValueError:
-		return getGrid(name)
+		return get_grid(name)
 		
 
 @get("/api/grids/id/:gridId")
 def gridAPI(gridId):
 	try:
 		gridId = int(gridId)
-		grid = getGrid(gridId)
+		grid = get_grid(gridId)
 		if not grid:
 			return {"error": "No grid #%s" % gridId}
-		grid["pixels"] = unpackPixels(grid["pixels"])
+		grid["pixels"] = unpack_pixels(grid["pixels"])
 		for i in range(len(grid["frames"])):
-			grid["frames"][i] = unpackPixels(grid["frames"][i])
+			grid["frames"][i] = unpack_pixels(grid["frames"][i])
 		return grid
 		
 	except ValueError:
@@ -132,7 +132,7 @@ def saveGridAPI():
 	j = request.POST.get("json")
 	if not j:
 		return {"error": "No postdata."}
-	return saveGrid(json.loads(j))
+	return save_grid(json.loads(j))
 
 
 @get("/api/grids/deactivate/:gridId")
