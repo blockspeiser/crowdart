@@ -232,7 +232,7 @@ def make_bits():
 	
 	grids = db.grids.find()
 	db.gridbits.remove()
-	grid = grids.next()
+	grid = grids.next() 
 	
 	while grid:
 		del grid["_id"]
