@@ -15,7 +15,7 @@ def home():
 	response_body = f.read()
 	f.close()
 
-	response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
+	# response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
 	
 	return response_body	
 
@@ -27,7 +27,7 @@ def showAll():
 	f.close()
 	
 	response_body = response_body.replace('branch = [];', "branch = %s;" % json.dumps(get_grid()["branches"]));
-	response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
+	# response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
 
 	return response_body
 
@@ -40,7 +40,7 @@ def showOneGrid(name):
 
 	response_body = response_body.replace('branches = []', "branches = %s" % json.dumps(get_grid(name)))
 	response_body = response_body.replace('task = ""', 'task = "%s"' % name)
-	response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
+	# response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
 
 	return response_body		
 	
@@ -52,7 +52,7 @@ def showDraw():
 	response_body = f.read()
 	f.close()
 	response_body = response_body.replace('"ASSIGNMENT"', json.dumps(assign_grid()))
-	response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
+	# response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
 
 	return response_body
 	
@@ -69,7 +69,7 @@ def showOneDraw(name):
 	except ValueError:
 		grid = assign_grid(name)
 	response_body = response_body.replace('"ASSIGNMENT"', json.dumps(grid))
-	response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
+	# response_body = response_body.replace('</body>', "%s</body>" % open(PATH + '/social.html', 'r').read())
 
 	return response_body
 
